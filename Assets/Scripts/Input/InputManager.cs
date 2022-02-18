@@ -9,32 +9,30 @@ public class InputManager : MonoBehaviour
 
     private float _maxDistance = 10000000;
     private bool _zonOfPeople;
+    private float _distanceFromCamera = 6.5f;
+    Vector3 _screenWorldPosition;
 
     private void Update()
     {
-        //var mp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-        Vector3 screenMouse = Input.mousePosition;
-        Vector3 worldMouse = Camera.main.ScreenToWorldPoint(screenMouse);
-        Debug.Log(screenMouse);
+        _screenWorldPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, _distanceFromCamera));
+        if (Input.GetMouseButtonDown(0))
+        {
+            _zonOfPeople = Physics.Raycast(Camera.main.transform.position, Camera.main.ScreenPointToRay(Input.mousePosition).direction, _maxDistance, _layerMask);
+            
+        }
 
+        if (Input.GetMouseButtonUp(0))
+        {
+            _zonOfPeople = false;
+            _navigator.ChangeSpriteRenderer(false);
+        }
 
+        if (_zonOfPeople == true)
+        {
+            _navigator.ChangeSpriteRenderer(true);
+            _navigator.Track(_screenWorldPosition);
+        }
 
-        //Debug.Log(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-        //if (Input.GetMouseButtonDown(0))
-        //{
-        //    _zonOfPeople = Physics.Raycast(Camera.main.transform.position, Camera.main.ScreenPointToRay(Input.mousePosition).direction, _maxDistance, _layerMask);
-
-        //    if (_zonOfPeople == true)
-        //    {
-        //        _navigator.ChangeSpriteRenderer(true);
-        //    }
-        //}
-        //else
-        //{
-        //    //_spriteRendererNavigator.enabled = false;
-        //}
-        _navigator.Track(screenMouse);
-                
     }
 }
