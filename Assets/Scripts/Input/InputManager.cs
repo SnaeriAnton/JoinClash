@@ -14,25 +14,44 @@ public class InputManager : MonoBehaviour
 
     private void Update()
     {
+        _screenWorldPosition = GetScreenPosition();
 
-        _screenWorldPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, _distanceFromCamera));
         if (Input.GetMouseButtonDown(0))
         {
-            _zonOfPeople = Physics.Raycast(Camera.main.transform.position, Camera.main.ScreenPointToRay(Input.mousePosition).direction, _maxDistance, _layerMask);
-            
+            Touch();
         }
 
         if (Input.GetMouseButtonUp(0))
         {
-            _zonOfPeople = false;
-            _navigator.ChangeSpriteRenderer(false);
+            LetGo();
         }
 
+        SetDirection(_screenWorldPosition);
+    }
+
+    private Vector3 GetScreenPosition()
+    {
+        Vector3 screenPosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, _distanceFromCamera);
+        Vector3 screenWorldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
+        return screenWorldPosition;
+    }
+
+    private void Touch()
+    {
+        _zonOfPeople = Physics.Raycast(Camera.main.transform.position, Camera.main.ScreenPointToRay(Input.mousePosition).direction, _maxDistance, _layerMask);
+    }
+
+    private void LetGo()
+    {
+        _zonOfPeople = false;
+        _navigator.Track(Vector3.zero, _zonOfPeople);
+    }
+
+    private void SetDirection(Vector3 screenWorldPosition)
+    {
         if (_zonOfPeople == true)
         {
-            _navigator.ChangeSpriteRenderer(true);
-            _navigator.Track(_screenWorldPosition);
+            _navigator.Track(screenWorldPosition, _zonOfPeople);
         }
-
     }
 }
