@@ -1269,8 +1269,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a94a046d8fb9aeb478e53a0b9f785876, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _transform: {fileID: 376215035}
-  _transformNavigator: {fileID: 1474265402}
 --- !u!4 &1474265402
 Transform:
   m_ObjectHideFlags: 0
@@ -1301,6 +1299,7 @@ MonoBehaviour:
   _transformZone: {fileID: 1394840186}
   _spriteRendereCircle: {fileID: 376215036}
   _transform: {fileID: 1474265402}
+  _transformWay: {fileID: 376215035}
 --- !u!54 &1474265404
 Rigidbody:
   m_ObjectHideFlags: 0
