@@ -4,5 +4,8 @@ using UnityEngine;
 
 public class Human : MonoBehaviour
 {
+    public void SetParent(Transform parent)
+    {
 
+    }
 }

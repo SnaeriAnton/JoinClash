@@ -6,6 +6,7 @@ public class InputManager : MonoBehaviour
 {
     [SerializeField] private LayerMask _layerMask;
     [SerializeField] private Navigator _navigator;
+    [SerializeField] private Way _way;
 
     private float _maxDistance = 10000000;
     private bool _zonOfPeople;
@@ -45,6 +46,7 @@ public class InputManager : MonoBehaviour
     {
         _zonOfPeople = false;
         _navigator.Track(Vector3.zero, _zonOfPeople);
+        _way.ClearLines();
     }
 
     private void SetDirection(Vector3 screenWorldPosition)
@@ -52,6 +54,20 @@ public class InputManager : MonoBehaviour
         if (_zonOfPeople == true)
         {
             _navigator.Track(screenWorldPosition, _zonOfPeople);
+            if (CheakDistanceBetweenZonAndNavigator() == true)
+            {
+                _way.PaveWay();
+            }
         }
+    }
+
+    private bool CheakDistanceBetweenZonAndNavigator()
+    {
+        float disctance = Vector3.Distance(_navigator.transform.position, _way.transform.position);
+        if (disctance > 0.26f)
+        {
+            return true;
+        }
+        return false;
     }
 }
