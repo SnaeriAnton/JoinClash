@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Way : MonoBehaviour
 {
@@ -10,20 +11,22 @@ public class Way : MonoBehaviour
     [SerializeField] private Transform _containerWays;
     [SerializeField] private Color _defaultColorLine;
     [SerializeField] private Color _crosedPeopleColorLine;
-    [SerializeField] private Mover _mover;
+    [SerializeField] private CrowdMover _mover;
 
     private List<LineRenderer> _lines = new List<LineRenderer>();
     private List<Zone> _zones = new List<Zone>();
     private int _wayLineCount = 0;
     private int _firstContact = 0;
     private int _invertVector = -1;
+    private float _distance = 0;
+    private float _defaulsDistance = 1.95f;
+    private bool _isFirst = true;
 
-    private float _maxDistance = 0;
-    private float _defaulsMaxDistance = 1.95f;
+    public UnityAction<float> MovedAway;
 
     private void Start()
     {
-        _maxDistance = _defaulsMaxDistance;
+        //_distance = _defaulsDistance;
     }
 
     public void Update()
@@ -35,6 +38,12 @@ public class Way : MonoBehaviour
 
     public void PaveWay()
     {
+        if (_isFirst == true)
+        {
+            _distance = 0.5f;
+            _isFirst = false;
+        }
+
         _wayLineCount = 0;
         _wayLineCount += CalculaterWayLine(_transform.position + _transform.forward * 0.1f, _transform.forward, _wayLineCount);
         RemoveOldLine(_wayLineCount);
@@ -48,6 +57,7 @@ public class Way : MonoBehaviour
             Destroy(line.gameObject);
         }
         _lines.Clear();
+        _isFirst = true;
     }
 
     public void HandOverPosition()
@@ -71,14 +81,14 @@ public class Way : MonoBehaviour
     private int CalculaterWayLine(Vector3 startPosition, Vector3 direction, int indexLine, Zone zoneWithPeople = null)
     {
         int addLine = 1;
-        RaycastHit[] hits = Physics.RaycastAll(startPosition, direction, _maxDistance, _layerMask);
-        Debug.DrawRay(startPosition, direction * _maxDistance, Color.red);
+        RaycastHit[] hits = Physics.RaycastAll(startPosition, direction, _distance, _layerMask);
+        Debug.DrawRay(startPosition, direction * _distance, Color.red);
         Vector3 hitPosition;
 
         if (hits.Length == 0)
         {
-            _maxDistance = _defaulsMaxDistance;
-            hitPosition = startPosition + direction * _maxDistance;
+            _distance = _defaulsDistance;
+            hitPosition = startPosition + direction * _distance;
             if (_zones.Count == 0)
             {
                 ChabgeColorLineWay(false);
@@ -101,27 +111,27 @@ public class Way : MonoBehaviour
             {
                 if (hit.transform.TryGetComponent<Finger>(out Finger finger))
                 {
-                    _maxDistance = Vector3.Distance(_transform.position, finger.transform.position);
+                    _distance = Vector3.Distance(_transform.position, finger.transform.position);
+                    MovedAway?.Invoke(_distance);
                 }
             }
 
             if (hits[_firstContact].transform.TryGetComponent<Wall>(out Wall wall))
             {
-                _maxDistance = _defaulsMaxDistance;
+                _distance = _defaulsDistance;
                 addLine += CalculaterWayLine(hits[_firstContact].point, Vector3.Reflect(direction, hits[_firstContact].normal), indexLine + addLine);
             }
 
             if (hits[_firstContact].transform.TryGetComponent<Zone>(out Zone zone))
             {
-                _maxDistance = _defaulsMaxDistance;
+                _distance = _defaulsDistance;
                 if (CheakPeople(zone))
                 {
-                    //Через центр? от последнего качания!
                     addLine += CalculaterWayLine(zone.transform.position, hits[_firstContact].normal * _invertVector, indexLine + addLine, zone);
                 }
                 else
                 {
-                    hitPosition = startPosition + direction * _maxDistance;
+                    hitPosition = startPosition + direction * _distance;
                     DrawWayLine(startPosition, hitPosition, indexLine);
                 }
                 ChabgeColorLineWay(true);

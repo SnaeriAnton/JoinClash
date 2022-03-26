@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Navigator : MonoBehaviour
@@ -10,16 +8,14 @@ public class Navigator : MonoBehaviour
     [SerializeField] private SphereCollider _sphereCollider;
 
     private float _radius = 1.8f;
-    private bool _isEnable = false;
+
 
     public void Track(Vector3 newPosition, bool spriteEnable)
     {
         Vector3 position;
-        ChangeSpriteRenderer(spriteEnable);
         if (newPosition == Vector3.zero)
         {
             position = new Vector3(_transformZone.position.x, _transform.position.y, _transformZone.position.z);
-            ChangeSpriteRenderer(spriteEnable);
         }
         else
         {
@@ -28,12 +24,10 @@ public class Navigator : MonoBehaviour
         _transform.position = new Vector3(position.x, _transform.position.y, position.z);
     }
 
-    private void ChangeSpriteRenderer(bool value)
+    private void EnableComponents(bool value)
     {
-        if (_isEnable == false)
-        {
-            _spriteRendereCircle.enabled = value;
-        }
+        _spriteRendereCircle.enabled = value;
+        _sphereCollider.enabled = value;
     }
 
     public Vector3 GetVectorMagnitude(Vector3 position, Vector3 centerCirclePosition)
@@ -44,20 +38,22 @@ public class Navigator : MonoBehaviour
         return vector;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerStay(Collider other)
     {
-        if (collision.gameObject.TryGetComponent<Wall>(out Wall wall) == true || collision.gameObject.TryGetComponent<Zone>(out Zone people))
+        if (other.TryGetComponent<Wall>(out Wall wall) == true || other.TryGetComponent<Zone>(out Zone people) == true)
         {
-            _sphereCollider.enabled = false;
-            ChangeSpriteRenderer(false);
-            _isEnable = true;
+            EnableComponents(false);
         }
     }
 
-    private void OnCollisionExit(Collision collision)
+    private void OnTriggerExit(Collider other)
     {
-        _sphereCollider.enabled = true;
-        ChangeSpriteRenderer(true);
-        _isEnable = false;
+        EnableComponents(true);
+    }
+
+
+    private void OnDisable()
+    {
+        EnableComponents(true);
     }
 }

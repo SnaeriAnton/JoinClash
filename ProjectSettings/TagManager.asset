@@ -18,10 +18,10 @@ TagManager:
   - Wall
   - People
   - MainPeople
-  - 
-  - 
-  - 
-  - 
+  - Navigator
+  - Human
+  - Crowd
+  - ArenaFloor
   - 
   - 
   - 

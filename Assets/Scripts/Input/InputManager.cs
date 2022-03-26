@@ -1,17 +1,27 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InputManager : MonoBehaviour
 {
     [SerializeField] private LayerMask _layerMask;
     [SerializeField] private Navigator _navigator;
+    [SerializeField] private GameObject _navigatorObject;
     [SerializeField] private Way _way;
+    [SerializeField] private Crowd _crowd;
 
     private float _maxDistance = 10000000;
     private bool _zonOfPeople;
     private float _distanceFromCamera = 6.5f;
     Vector3 _screenWorldPosition;
+
+    private void OnEnable()
+    {
+        _crowd.Finished += OnDisableInput;
+    }
+
+    private void OnDisable()
+    {
+        _crowd.Finished += OnDisableInput;
+    }
 
     private void Update()
     {
@@ -26,7 +36,10 @@ public class InputManager : MonoBehaviour
         {
             LetGo();
         }
+    }
 
+    private void FixedUpdate()
+    {
         SetDirection(_screenWorldPosition);
     }
 
@@ -45,6 +58,7 @@ public class InputManager : MonoBehaviour
     private void LetGo()
     {
         _zonOfPeople = false;
+        _navigatorObject.SetActive(_zonOfPeople);
         _navigator.Track(Vector3.zero, _zonOfPeople);
         _way.ClearLines();
     }
@@ -53,6 +67,7 @@ public class InputManager : MonoBehaviour
     {
         if (_zonOfPeople == true)
         {
+            _navigatorObject.SetActive(_zonOfPeople);
             _navigator.Track(screenWorldPosition, _zonOfPeople);
             if (CheakDistanceBetweenZonAndNavigator() == true)
             {
@@ -69,5 +84,10 @@ public class InputManager : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    private void OnDisableInput()
+    {
+        this.enabled = false;
     }
 }

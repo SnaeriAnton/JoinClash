@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class Zone : MonoBehaviour
 {
@@ -11,11 +8,13 @@ public class Zone : MonoBehaviour
     [SerializeField] private Transform _transform;
     [SerializeField] private GameObject _zone;
 
-    private Human[] _peoples;
+    private Human[] _people;
+    private int _coutnPeopleInZone;
 
     private void Start()
     {
-        _peoples = GetComponentsInChildren<Human>();
+        _people = GetComponentsInChildren<Human>();
+        _coutnPeopleInZone = _people.Length;
     }
 
     public Vector3 Position => _transform.position;
@@ -30,15 +29,15 @@ public class Zone : MonoBehaviour
         _spriteRenderer.color = _defaultColor;
     }
 
-
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.TryGetComponent<Crowd>(out Crowd crowd))
         {
-            for (int i = 0; i < _peoples.Length; i++)
+            for (int i = 0; i < _people.Length; i++)
             {
-                crowd.Add(_peoples[i]);
+                crowd.AddPeople(_people[i]);
             }
+            crowd.AddPeople(_coutnPeopleInZone, true);
             _zone.SetActive(false);
         }
     }
