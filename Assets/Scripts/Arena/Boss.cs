@@ -5,7 +5,7 @@ public class Boss : MonoBehaviour
     [SerializeField] private Transform _trandform;
     [SerializeField] private BossAnimator _bossAnimator;
 
-    private float _health = 300;
+    private int _health = 300;
 
     private Vector3 _defaultPosition;
 
@@ -27,7 +27,7 @@ public class Boss : MonoBehaviour
         }
     }
 
-    public void TakingDamage(float damage)
+    public void TakingDamage(int damage)
     {
         _health -= damage;
         ChekDeath();

@@ -9,6 +9,8 @@ public class Crowd : MonoBehaviour
     [SerializeField] private Transform _transformLookAt;
     [SerializeField] private List<Human> _notActivePeople;
     [SerializeField] private Way _way;
+    [SerializeField] private CrowdMover _crowdMover;
+    [SerializeField] private Navigator _navigator;
 
     private int _countPeople;
     private List<Human> _peopleInCrowd = new List<Human>();
@@ -27,11 +29,17 @@ public class Crowd : MonoBehaviour
     private void OnEnable()
     {
         _way.MovedAway += OnSetDistance;
+        _crowdMover.Arrived += OnStayStill;
+        _crowdMover.Seted += OnSetLookAtTarget;
+        _navigator.Enabled += OnSee;
     }
-    
+
     private void OnDisable()
     {
         _way.MovedAway -= OnSetDistance;
+        _crowdMover.Arrived -= OnStayStill;
+        _crowdMover.Seted -= OnSetLookAtTarget;
+        _navigator.Enabled -= OnSee;
     }
 
     private void Start()
@@ -182,6 +190,7 @@ public class Crowd : MonoBehaviour
             _notActivePeople[i].SetActive(true);
             _notActivePeople[i].SetLookAt(_transformLookAt);
             _notActivePeople[i].SetRadius(radius);
+            _notActivePeople[i].StandPoseToRun();
             _notActivePeople.RemoveAt(i);
         }
 
@@ -214,7 +223,33 @@ public class Crowd : MonoBehaviour
     {
         foreach (var human in _peopleInCrowd)
         {
-            human.StandPoseToRun(distance);
+            human.ReadyToRun(distance);
+        }
+    }
+
+    private void OnStayStill()
+    {
+        int distance = 0;
+        foreach (var human in _peopleInCrowd)
+        {
+            human.ReadyToRun(distance);
+            human.Stay();
+        }
+    }
+
+    private void OnSetLookAtTarget(Vector3 position)
+    {
+        foreach (var human in _peopleInCrowd)
+        {
+            human.LookAtRotation(position);
+        }
+    }
+
+    private void OnSee()
+    {
+        foreach (var human in _peopleInCrowd)
+        {
+            human.See();
         }
     }
 
@@ -229,10 +264,12 @@ public class Crowd : MonoBehaviour
         {
             foreach (var human in _peopleInCrowd)
             {
-                human.SetBossPosition(finish.PositionBoss);
+                human.SetBossParameters(finish.PositionBoss);
             }
             _sphereCollider.enabled = false;
             Finished?.Invoke();
+            this.enabled = false;
+            _crowdMover.enabled = false;
         }
     }
 }

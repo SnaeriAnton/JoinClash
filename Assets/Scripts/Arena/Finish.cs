@@ -4,5 +4,5 @@ public class Finish : MonoBehaviour
 {
     [SerializeField] private Transform _transformBoss;
 
-    public Vector3 PositionBoss => _transformBoss.position;
+    public Transform PositionBoss => _transformBoss;
 }

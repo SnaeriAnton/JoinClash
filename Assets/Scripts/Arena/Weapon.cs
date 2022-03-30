@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
-    private float _damage = 10;
+    private int _damage = 10;
 
     private void OnTriggerEnter(Collider other)
     {

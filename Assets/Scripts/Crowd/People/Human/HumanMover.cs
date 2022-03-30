@@ -1,41 +1,33 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(HumanAnimator))]
 public class HumanMover : MonoBehaviour
 {
     [SerializeField] private NavMeshAgent _navMeshAgent;
     [SerializeField] private Transform _transform;
-    [SerializeField] private HumanAnimator _humanAnimator;
+    [SerializeField] private HumanAnimator _animator;
 
     private Vector3 _bossPosition;
     private Vector3 _stopPosition;
 
-    private void Start()
+    private void OnDisable()
     {
-        _bossPosition = Vector3.zero;
-        _stopPosition = Vector3.zero;
+        _navMeshAgent.enabled = false;
     }
 
     private void Update()
     {
-        if (_bossPosition != Vector3.zero)
-        {
-            _navMeshAgent.SetDestination(_bossPosition);
-        }
-
-        if (_stopPosition != Vector3.zero)
-        {
-            //_transform.position = _stopPosition;
-        }
+        _navMeshAgent.SetDestination(_bossPosition);
+        //_transform.position = Vector3.MoveTowards(_transform.position, _bossPosition, 0.003f);
     }
 
     public void SetBossPosition(Vector3 bossPosition)
     {
         _navMeshAgent.enabled = true;
         _bossPosition = bossPosition;
-        _humanAnimator.Run();
+        _animator.Run();
     }
 
 
@@ -43,8 +35,8 @@ public class HumanMover : MonoBehaviour
     {
         if (other.TryGetComponent<Boss>(out Boss boss))
         {
-            _bossPosition = Vector3.zero;
-            _stopPosition = _transform.position;
+            //_bossPosition = Vector3.zero;
+            //_stopPosition = _transform.position;
         }
     }
 }

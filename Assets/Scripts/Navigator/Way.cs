@@ -119,12 +119,14 @@ public class Way : MonoBehaviour
             if (hits[_firstContact].transform.TryGetComponent<Wall>(out Wall wall))
             {
                 _distance = _defaulsDistance;
+                MovedAway?.Invoke(_distance);
                 addLine += CalculaterWayLine(hits[_firstContact].point, Vector3.Reflect(direction, hits[_firstContact].normal), indexLine + addLine);
             }
 
             if (hits[_firstContact].transform.TryGetComponent<Zone>(out Zone zone))
             {
                 _distance = _defaulsDistance;
+                MovedAway?.Invoke(_distance);
                 if (CheakPeople(zone))
                 {
                     addLine += CalculaterWayLine(zone.transform.position, hits[_firstContact].normal * _invertVector, indexLine + addLine, zone);

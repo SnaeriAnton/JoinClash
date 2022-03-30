@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Navigator : MonoBehaviour
 {
@@ -9,6 +10,12 @@ public class Navigator : MonoBehaviour
 
     private float _radius = 1.8f;
 
+    public UnityAction Enabled; 
+
+    private void OnEnable()
+    {
+        Enabled?.Invoke();
+    }
 
     public void Track(Vector3 newPosition, bool spriteEnable)
     {
