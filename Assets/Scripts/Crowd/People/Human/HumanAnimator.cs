@@ -39,7 +39,7 @@ public class HumanAnimator : MonoBehaviour
 
     public void Win()
     {
-        _animator.SetTrigger(_win);
         GetReadyToRun(_defaultDistance);
+        _animator.SetTrigger(_win);
     }
 }

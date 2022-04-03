@@ -18,18 +18,9 @@ public class Human : MonoBehaviour
     private int _health = 10;
     private bool _isBoss = false;
     private bool _sees = false;
+    private Boss _boss;
 
     public UnityAction Finished;
-
-    private void OnEnable()
-    {
-        _fighter.Won += OnWin;
-    }
-
-    private void OnDisable()
-    {
-        _fighter.Won -= OnWin;
-    }
 
     private void Update()
     {
@@ -40,7 +31,7 @@ public class Human : MonoBehaviour
         }
     }
 
-    public void ReacheFinish(Transform bossPosition)
+    public void ReacheFinish(Transform bossPosition, Boss boss)
     {
         _isBoss = true;
         _fighter.enabled = true;
@@ -50,6 +41,8 @@ public class Human : MonoBehaviour
         See();
         SetLookAt(bossPosition);
         Finished?.Invoke();
+        _boss = boss;
+        _boss.Died += OnWin;
     }
 
     public void SetLookAt(Transform lookAt)
@@ -118,5 +111,7 @@ public class Human : MonoBehaviour
     private void OnWin()
     {
         _animator.Win();
+        _boss.Died -= OnWin;
+        _mover.enabled = false;
     }
 }

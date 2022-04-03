@@ -22,7 +22,7 @@ public class CrowdTracker : MonoBehaviour
     {
         if (_finish == false)
         {
-            _transform.position = new Vector3(_transformMainZone.position.x, _transform.position.y, _transformMainZone.position.z + -2.175f);
+            _transform.position = new Vector3(_transformMainZone.position.x, _transform.position.y, _transformMainZone.position.z + -1.497f);
 
         }
 

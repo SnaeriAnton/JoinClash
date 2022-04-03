@@ -18,6 +18,7 @@ public class Way : MonoBehaviour
     private int _firstContact = 0;
     private int _invertVector = -1;
     private float _distance = 0;
+    private float _offsetCrowd = 0.1f;
     private float _defaulsDistance = 1.95f;
     private bool _isFirst = true;
     private int _endPositionLine = 1;
@@ -43,7 +44,7 @@ public class Way : MonoBehaviour
         }
 
         _wayLineCount = 0;
-        _wayLineCount += CalculaterWayLine(_transform.position + _transform.forward * 0.1f, _transform.forward, _wayLineCount);
+        _wayLineCount += CalculaterWayLine(_transform.position + _transform.forward * _offsetCrowd, _transform.forward, _wayLineCount);
         RemoveOldLine(_wayLineCount);
     }
 

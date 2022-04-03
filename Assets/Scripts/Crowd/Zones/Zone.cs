@@ -7,10 +7,14 @@ public class Zone : MonoBehaviour
     [SerializeField] private GameObject _zone;
     [SerializeField] private Sprite _selectedSprite;
     [SerializeField] private Sprite _deselectSprite;
+    [SerializeField] private GameObject _bubble;
+    [SerializeField] private BubbleCountPeople _countPeopleOfZone;
+    [SerializeField] private SphereCollider _sphereCollider;
 
     private Human[] _people;
     private int _coutnPeopleInZone;
-    
+
+    public int CountPeople => _people.Length;
 
     private void Start()
     {
@@ -34,12 +38,15 @@ public class Zone : MonoBehaviour
     {
         if (collision.gameObject.TryGetComponent<Crowd>(out Crowd crowd))
         {
+            _sphereCollider.enabled = false;
             for (int i = 0; i < _people.Length; i++)
             {
                 crowd.AddPeople(_people[i]);
             }
             crowd.AddPeople(_coutnPeopleInZone, true);
             _zone.SetActive(false);
+            _bubble.SetActive(true);
+            _countPeopleOfZone.SetCountPeople(_people.Length);
         }
     }
 }

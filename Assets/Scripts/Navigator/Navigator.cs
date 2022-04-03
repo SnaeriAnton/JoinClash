@@ -7,20 +7,30 @@ public class Navigator : MonoBehaviour
     [SerializeField] private SpriteRenderer _spriteRendereCircle;
     [SerializeField] private Transform _transform;
     [SerializeField] private SphereCollider _sphereCollider;
+    [SerializeField] private Crowd _crowd;
+    [SerializeField] private GameObject _finger;
 
-    private float _radius = 1.8f;
+    private float _radius = 0;
+    private float _defaultRadius = 1.8f;
 
-    public UnityAction Enabled;
+    //public UnityAction Enabled;
     public UnityAction Disabled;
 
     private void OnEnable()
     {
-        Enabled?.Invoke();
+        //Enabled?.Invoke();
+       
+        _crowd.ChangedCrowd += OnSetRadius;
     }
 
     private void OnDisable()
     {
-        EnableComponents(true);
+        _crowd.ChangedCrowd -= OnSetRadius;
+    }
+
+    private void Start()
+    {
+        _radius = _defaultRadius;
     }
 
     public void Track(Vector3 newPosition, bool spriteEnable)
@@ -35,6 +45,11 @@ public class Navigator : MonoBehaviour
             position = GetVectorMagnitude(newPosition, _transformZone.position);
         }
         _transform.position = new Vector3(position.x, _transform.position.y, position.z);
+    }
+
+    public void DisableFinger(bool value)
+    {
+        _finger.SetActive(value);
     }
 
     private void EnableComponents(bool value)
@@ -66,5 +81,14 @@ public class Navigator : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         EnableComponents(true);
+    }
+
+    private void OnSetRadius(float radius)
+    {
+        _radius += radius;
+        if (_radius <= _defaultRadius)
+        {
+            _radius = _defaultRadius;
+        }
     }
 }

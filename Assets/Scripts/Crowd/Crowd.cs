@@ -11,12 +11,14 @@ public class Crowd : MonoBehaviour
     [SerializeField] private Way _way;
     [SerializeField] private CrowdMover _crowdMover;
     [SerializeField] private Navigator _navigator;
+    [SerializeField] private GameObject _bubble;
+    [SerializeField] private Finger _finger;
 
     private int _countPeople;
     private List<Human> _peopleInCrowd = new List<Human>();
     private float _radius;
     private int _radiusCircle = 360;
-    private float _stepRadiusCircle = 0.36f;
+    private float _stepRadiusCircle = 0.28f;
     private int _countPeopleInFullCircles;
     private int _maxPeopleInCircle = 8;
     private int _stepCountPeople = 8;
@@ -25,13 +27,15 @@ public class Crowd : MonoBehaviour
     public Transform TransformParent => _transform;
 
     public UnityAction Finished;
+    public UnityAction<int> AddedPeople;
+    public UnityAction<float> ChangedCrowd;
 
     private void OnEnable()
     {
         _way.MovedAway += OnSetDistance;
         _crowdMover.Arrived += OnStayStill;
         _crowdMover.Seted += OnSetLookAtTarget;
-        _navigator.Enabled += OnSee;
+        _finger.Enabled += OnSee;
     }
 
     private void OnDisable()
@@ -39,7 +43,7 @@ public class Crowd : MonoBehaviour
         _way.MovedAway -= OnSetDistance;
         _crowdMover.Arrived -= OnStayStill;
         _crowdMover.Seted -= OnSetLookAtTarget;
-        _navigator.Enabled -= OnSee;
+        _finger.Enabled -= OnSee;
     }
 
     private void Start()
@@ -54,6 +58,7 @@ public class Crowd : MonoBehaviour
             _peopleInCrowd[i].SetLookAt(_transformLookAt);
             _peopleInCrowd[i].SetActive(true);
         }
+        AddedPeople?.Invoke(_peopleInCrowd.Count);
     }
 
     public void AddPeople(Human human)
@@ -149,6 +154,7 @@ public class Crowd : MonoBehaviour
             _maxPeopleInCircle += _stepCountPeople;
             _radius += _stepRadiusCircle;
             _sphereCollider.radius = _radius;
+            ChangedCrowd?.Invoke(_stepRadiusCircle);
         }
         else
         {
@@ -160,6 +166,7 @@ public class Crowd : MonoBehaviour
             }
             _radius -= _stepRadiusCircle;
             _sphereCollider.radius = _radius;
+            ChangedCrowd?.Invoke(-_stepRadiusCircle);
         }
     }
 
@@ -167,6 +174,7 @@ public class Crowd : MonoBehaviour
     {
         _countPeopleInFullCircles = _minCountPeople;
         _maxPeopleInCircle = _stepCountPeople;
+        ChangedCrowd?.Invoke(-_radius);
         _radius = _stepRadiusCircle;
         _sphereCollider.radius = _radius;
     }
@@ -193,6 +201,8 @@ public class Crowd : MonoBehaviour
             _notActivePeople[i].StandPoseToRun();
             _notActivePeople.RemoveAt(i);
         }
+
+        AddedPeople?.Invoke(_peopleInCrowd.Count);
 
         int startValue = _peopleInCrowd.Count - (peopleInCircle + countPeople);
 
@@ -264,12 +274,13 @@ public class Crowd : MonoBehaviour
         {
             foreach (var human in _peopleInCrowd)
             {
-                human.ReacheFinish(finish.PositionBoss);
+                human.ReacheFinish(finish.PositionBoss, finish.Boss);
             }
             _sphereCollider.enabled = false;
             Finished?.Invoke();
             this.enabled = false;
             _crowdMover.enabled = false;
+            _bubble.SetActive(false);
         }
     }
 }

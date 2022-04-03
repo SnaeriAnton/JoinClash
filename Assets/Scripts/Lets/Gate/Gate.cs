@@ -6,6 +6,8 @@ public class Gate : MonoBehaviour
 {
     [SerializeField] private List<Banner> _banners;
     [SerializeField] private GameObject _gates;
+    [SerializeField] private BubbleCountPeople _bubbleCountPeople;
+    [SerializeField] private GameObject _bubble;
 
     private void OnEnable()
     {
@@ -23,8 +25,10 @@ public class Gate : MonoBehaviour
         }
     }
 
-    private void OnDisableBavers()
+    private void OnDisableBavers(Vector3 position, int count, bool status)
     {
+        _bubble.SetActive(true);
+        _bubbleCountPeople.SetCountPeople(position, count, status);
         _gates.SetActive(false);
     }
 }

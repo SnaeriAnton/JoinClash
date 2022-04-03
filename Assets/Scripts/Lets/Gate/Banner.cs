@@ -12,6 +12,9 @@ public class Banner : MonoBehaviour
     [SerializeField] private bool _addition;
     [SerializeField] private bool _subtraction;
     [SerializeField] private TMP_Text _text;
+    [SerializeField] private Transform _transform;
+
+    private bool _status = true;
 
     public int Number => _number;
     public bool Divide => _divide;
@@ -19,7 +22,7 @@ public class Banner : MonoBehaviour
     public bool Addition => _addition;
     public bool Subtraction => _subtraction;
 
-    public UnityAction Crossed;
+    public UnityAction<Vector3, int, bool> Crossed;
 
     private void Start()
     {
@@ -32,6 +35,7 @@ public class Banner : MonoBehaviour
         if (_divide == true)
         {
             sign = '/';
+            _status = false;
         }
         else if (_multiply == true)
         {
@@ -40,13 +44,12 @@ public class Banner : MonoBehaviour
         else if (_subtraction == true)
         {
             sign = '-';
+            _status = false;
         }
         else if (_addition == true)
         {
             sign = '+';
         }
-
-
         _text.text = sign + _number.ToString();
     }
 
@@ -54,7 +57,7 @@ public class Banner : MonoBehaviour
     {
         if (other.gameObject.TryGetComponent<Crowd>(out Crowd crowd))
         {
-            Crossed?.Invoke();
+            Crossed?.Invoke(_transform.position, _number, _status);
         }
     }
 }
