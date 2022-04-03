@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(HumanAnimator))]
 [RequireComponent(typeof(HumanFighter))]
@@ -18,23 +19,37 @@ public class Human : MonoBehaviour
     private bool _isBoss = false;
     private bool _sees = false;
 
+    public UnityAction Finished;
+
+    private void OnEnable()
+    {
+        _fighter.Won += OnWin;
+    }
+
+    private void OnDisable()
+    {
+        _fighter.Won -= OnWin;
+    }
+
     private void Update()
     {
+        Debug.DrawRay(_transform.position, _transform.forward * 1, Color.red);
         if (_sees == true)
         {
             _transform.LookAt(_lookAt);
         }
     }
 
-    public void SetBossParameters(Transform position)
+    public void ReacheFinish(Transform bossPosition)
     {
         _isBoss = true;
         _fighter.enabled = true;
         _option.enabled = false;
         _mover.enabled = true;
-        _mover.SetBossPosition(position.position);
+        _mover.SetBossPosition(bossPosition.position);
         See();
-        SetLookAt(position);
+        SetLookAt(bossPosition);
+        Finished?.Invoke();
     }
 
     public void SetLookAt(Transform lookAt)
@@ -96,8 +111,12 @@ public class Human : MonoBehaviour
         if (damage > 0)
         {
             _health -= damage;
-            //_fighter.ChekDeath(_health);
             _death.ChekDeath(_health);
         }
+    }
+
+    private void OnWin()
+    {
+        _animator.Win();
     }
 }

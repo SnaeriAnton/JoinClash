@@ -9,11 +9,10 @@ public class Way : MonoBehaviour
     [SerializeField] private LayerMask _layerMask;
     [SerializeField] private GameObject _wayLinePrefab;
     [SerializeField] private Transform _containerWays;
-    [SerializeField] private Color _defaultColorLine;
-    [SerializeField] private Color _crosedPeopleColorLine;
     [SerializeField] private CrowdMover _mover;
+    [SerializeField] private Navigator _navigator;
 
-    private List<LineRenderer> _lines = new List<LineRenderer>();
+    private List<Line> _lines = new List<Line>();
     private List<Zone> _zones = new List<Zone>();
     private int _wayLineCount = 0;
     private int _firstContact = 0;
@@ -21,19 +20,18 @@ public class Way : MonoBehaviour
     private float _distance = 0;
     private float _defaulsDistance = 1.95f;
     private bool _isFirst = true;
+    private int _endPositionLine = 1;
 
     public UnityAction<float> MovedAway;
 
-    private void Start()
+    private void OnEnable()
     {
-        //_distance = _defaulsDistance;
+        _navigator.Disabled += OnSetDistance;
     }
 
-    public void Update()
+    private void OnDisable()
     {
-        //_wayLineCount = 0;
-        //_wayLineCount += CalculaterWayLine(_transform.position + _transform.forward * 0.1f, _transform.forward, _wayLineCount);
-        //RemoveOldLine(_wayLineCount);
+        _navigator.Disabled -= OnSetDistance;
     }
 
     public void PaveWay()
@@ -52,19 +50,24 @@ public class Way : MonoBehaviour
     public void ClearLines()
     {
         HandOverPosition();
+
         foreach (var line in _lines)
         {
+            if (line.IsGoesWay == true)
+            {
+                line.GoesWay();
+            }
             Destroy(line.gameObject);
         }
         _lines.Clear();
         _isFirst = true;
     }
 
-    public void HandOverPosition()
+    private void HandOverPosition()
     {
         foreach (var line in _lines)
         {
-            _mover.AddTarget(line.GetPosition(1));
+            _mover.AddTarget(line.GetPositionLineRenderer(_endPositionLine));
         }
     }
 
@@ -87,7 +90,6 @@ public class Way : MonoBehaviour
 
         if (hits.Length == 0)
         {
-            _distance = _defaulsDistance;
             hitPosition = startPosition + direction * _distance;
             if (_zones.Count == 0)
             {
@@ -107,23 +109,25 @@ public class Way : MonoBehaviour
 
         if (hits.Length >= 1)
         {
+            bool isFinger = false;
             foreach (var hit in hits)
             {
                 if (hit.transform.TryGetComponent<Finger>(out Finger finger))
                 {
                     _distance = Vector3.Distance(_transform.position, finger.transform.position);
                     MovedAway?.Invoke(_distance);
+                    isFinger = true;
                 }
             }
 
-            if (hits[_firstContact].transform.TryGetComponent<Wall>(out Wall wall))
+            if (hits[_firstContact].transform.TryGetComponent<Wall>(out Wall wall) && isFinger == false)
             {
                 _distance = _defaulsDistance;
                 MovedAway?.Invoke(_distance);
                 addLine += CalculaterWayLine(hits[_firstContact].point, Vector3.Reflect(direction, hits[_firstContact].normal), indexLine + addLine);
             }
 
-            if (hits[_firstContact].transform.TryGetComponent<Zone>(out Zone zone))
+            if (hits[_firstContact].transform.TryGetComponent<Zone>(out Zone zone) && isFinger == false)
             {
                 _distance = _defaulsDistance;
                 MovedAway?.Invoke(_distance);
@@ -145,7 +149,7 @@ public class Way : MonoBehaviour
 
     private void DrawWayLine(Vector3 startposition, Vector3 finishPosition, int indexLine, Zone zoneWithPeople = null)
     {
-        LineRenderer line = null;
+        Line line = null;
         if (indexLine < _lines.Count)
         {
             line = _lines[indexLine];
@@ -153,16 +157,15 @@ public class Way : MonoBehaviour
         else
         {
             GameObject newLine = Instantiate(_wayLinePrefab, Vector3.zero, Quaternion.identity, _containerWays);
+
+            line = newLine.GetComponent<Line>();
             if (zoneWithPeople != null)
             {
-                newLine.GetComponent<Line>().SetZone(zoneWithPeople);
+                line.SetZone(zoneWithPeople);
             }
-            line = newLine.GetComponent<LineRenderer>();
-            //line.GetComponent<Transform>().rotation = Quaternion.Euler(0.4f, 0, 0);
             _lines.Add(line);
         }
-        line.SetPosition(0, startposition);
-        line.SetPosition(1, finishPosition);
+        line.SetPositionLineRenderer(startposition, finishPosition);
     }
 
     private bool CheakPeople(Zone zone)
@@ -180,22 +183,14 @@ public class Way : MonoBehaviour
 
     private void ChabgeColorLineWay(bool value)
     {
-        if (value == true)
+        for (int i = 0; i < _lines.Count; i++)
         {
-            SetColorLineWay(_crosedPeopleColorLine);
-        }
-        else
-        {
-            SetColorLineWay(_defaultColorLine);
+            _lines[i].ChangeColorLineRandarer(value);
         }
     }
 
-    private void SetColorLineWay(Color color)
+    private void OnSetDistance()
     {
-        for (int i = 0; i < _lines.Count; i++)
-        {
-            _lines[i].startColor = color;
-            _lines[i].endColor = color;
-        }
+        _distance = _defaulsDistance;
     }
 }

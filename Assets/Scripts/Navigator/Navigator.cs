@@ -10,11 +10,17 @@ public class Navigator : MonoBehaviour
 
     private float _radius = 1.8f;
 
-    public UnityAction Enabled; 
+    public UnityAction Enabled;
+    public UnityAction Disabled;
 
     private void OnEnable()
     {
         Enabled?.Invoke();
+    }
+
+    private void OnDisable()
+    {
+        EnableComponents(true);
     }
 
     public void Track(Vector3 newPosition, bool spriteEnable)
@@ -35,6 +41,10 @@ public class Navigator : MonoBehaviour
     {
         _spriteRendereCircle.enabled = value;
         _sphereCollider.enabled = value;
+        if (value == false)
+        {
+            Disabled?.Invoke();
+        }
     }
 
     public Vector3 GetVectorMagnitude(Vector3 position, Vector3 centerCirclePosition)
@@ -54,12 +64,6 @@ public class Navigator : MonoBehaviour
     }
 
     private void OnTriggerExit(Collider other)
-    {
-        EnableComponents(true);
-    }
-
-
-    private void OnDisable()
     {
         EnableComponents(true);
     }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Boss : MonoBehaviour
 {
@@ -6,8 +7,9 @@ public class Boss : MonoBehaviour
     [SerializeField] private BossAnimator _bossAnimator;
 
     private int _health = 300;
-
     private Vector3 _defaultPosition;
+
+    public UnityAction Died;
 
     private void Start()
     {
@@ -21,9 +23,10 @@ public class Boss : MonoBehaviour
 
     private void ChekDeath()
     {
-        if (_health < 0)
+        if (_health <= 0)
         {
             _bossAnimator.Diying();
+            Died?.Invoke();
         }
     }
 

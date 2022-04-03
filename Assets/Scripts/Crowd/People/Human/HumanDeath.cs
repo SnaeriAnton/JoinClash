@@ -7,6 +7,7 @@ using UnityEngine.Events;
 public class HumanDeath : MonoBehaviour
 {
     [SerializeField] private Rigidbody[] _rigidbodies;
+    [SerializeField] private Rigidbody _rigidbodie;
     [SerializeField] private Transform _transform;
     [SerializeField] private HumanAnimator _animator;
     [SerializeField] private GameObject _human;
@@ -26,17 +27,12 @@ public class HumanDeath : MonoBehaviour
 
     private void Update()
     {
-        Debug.DrawRay(_transform.position, new Vector3(_transform.forward.x * -1, 5f, _transform.forward.z * -1) * 0.5f, Color.red);
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Fall();
-        }
+        Debug.DrawRay(_transform.position, new Vector3(_transform.forward.x * -1, 3f, _transform.forward.z * -1) * 0.5f, Color.red);
     }
 
     public void ChekDeath(int health)
     {
-        if (health < 0)
+        if (health <= 0)
         {
             Diy();
         }
@@ -47,8 +43,9 @@ public class HumanDeath : MonoBehaviour
         SetKinematic(false);
         for (int i = 0; i < _rigidbodies.Length; i++)
         {
-            int forceó = Random.Range(1, 12) * 10;
-            _rigidbodies[i].AddForce(new Vector3(_transform.forward.x * -1, 5f, _transform.forward.z * -1) * (10 + forceó), ForceMode.Acceleration);
+            int forceó = Random.Range(1, 5) * 10;
+            //_rigidbodies[i].AddForce(new Vector3(_transform.forward.x * -1, 3f, _transform.forward.z * -1) * (10 + forceó), ForceMode.Acceleration);
+            _rigidbodies[i].AddForce(new Vector3(_transform.forward.x * -1, 3f, _transform.forward.z * -1) * (50 + forceó), ForceMode.Acceleration);
         }
     }
 
@@ -63,18 +60,11 @@ public class HumanDeath : MonoBehaviour
     private void Diy()
     {
         Died?.Invoke();
+        _rigidbodie.isKinematic = true;
         _capsileCollider.enabled = false;
         _animator.enabled = false;
         _mover.enabled = false;
         Fall();
         _isDeath = true;
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.TryGetComponent<Arena>(out Arena arena) && _isDeath == true)
-        {
-            Destroy(_human);
-        }
     }
 }

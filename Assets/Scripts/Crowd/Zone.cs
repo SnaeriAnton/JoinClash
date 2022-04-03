@@ -3,13 +3,14 @@ using UnityEngine;
 public class Zone : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer _spriteRenderer;
-    [SerializeField] private Color _defaultColor;
-    [SerializeField] private Color _selectedColor;
     [SerializeField] private Transform _transform;
     [SerializeField] private GameObject _zone;
+    [SerializeField] private Sprite _selectedSprite;
+    [SerializeField] private Sprite _deselectSprite;
 
     private Human[] _people;
     private int _coutnPeopleInZone;
+    
 
     private void Start()
     {
@@ -21,12 +22,12 @@ public class Zone : MonoBehaviour
 
     public void Select()
     {
-        _spriteRenderer.color = _selectedColor;
+        _spriteRenderer.sprite = _selectedSprite;
     }
 
     public void Deselect()
     {
-        _spriteRenderer.color = _defaultColor;
+        _spriteRenderer.sprite = _deselectSprite;
     }
 
     private void OnCollisionEnter(Collision collision)

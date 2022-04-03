@@ -10,6 +10,7 @@ public class HumanAnimator : MonoBehaviour
     private string _startRun = "StartRun";
     private string _idle = "Idle";
     private string _win = "Win";
+    private float _defaultDistance = 0;
 
     private void OnDisable()
     {
@@ -39,5 +40,6 @@ public class HumanAnimator : MonoBehaviour
     public void Win()
     {
         _animator.SetTrigger(_win);
+        GetReadyToRun(_defaultDistance);
     }
 }

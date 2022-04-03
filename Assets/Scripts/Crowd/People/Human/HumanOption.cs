@@ -8,6 +8,9 @@ public class HumanOption : MonoBehaviour
     [SerializeField] private Animator _animator;
     [SerializeField] private HumanMover _mover;
     [SerializeField] private GameObject _human;
+    [SerializeField] private Color _humanInCrowdColor;
+    [SerializeField] private Color _humanNotInCrowdColor;
+    [SerializeField] private SkinnedMeshRenderer _skinnedMeshRenderer;
 
     private float _radius = 0;
     private Vector3 _defaultPosition;
@@ -28,6 +31,7 @@ public class HumanOption : MonoBehaviour
         _human.SetActive(isActive);
         _inCrowd = isActive;
         _animator.enabled = isActive;
+        SetColor(isActive);
     }
 
     public void SetPosition(Vector3 position)
@@ -55,5 +59,22 @@ public class HumanOption : MonoBehaviour
         {
             _transform.localPosition = Vector3.ClampMagnitude(_transform.localPosition, _radius);
         }
+    }
+
+    private void SetColor(bool value)
+    {
+        if (value == true)
+        {
+            ChangeColor(_humanInCrowdColor);
+        }
+        else
+        {
+            ChangeColor(_humanNotInCrowdColor);
+        }
+    }
+
+    private void ChangeColor(Color color)
+    {
+        _skinnedMeshRenderer.material.color = color;
     }
 }

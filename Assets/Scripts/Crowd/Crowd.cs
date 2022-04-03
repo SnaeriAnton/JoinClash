@@ -264,7 +264,7 @@ public class Crowd : MonoBehaviour
         {
             foreach (var human in _peopleInCrowd)
             {
-                human.SetBossParameters(finish.PositionBoss);
+                human.ReacheFinish(finish.PositionBoss);
             }
             _sphereCollider.enabled = false;
             Finished?.Invoke();

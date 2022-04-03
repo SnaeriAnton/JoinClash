@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Finish : MonoBehaviour
+public class Finish : MonoBehaviour 
 {
     [SerializeField] private Transform _transformBoss;
 

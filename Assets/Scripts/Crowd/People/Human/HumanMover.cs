@@ -9,8 +9,14 @@ public class HumanMover : MonoBehaviour
     [SerializeField] private Transform _transform;
     [SerializeField] private HumanAnimator _animator;
 
-    private Vector3 _bossPosition;
-    private Vector3 _stopPosition;
+    private Vector3 _targetPosition;
+    private bool _isBoss = false;
+
+    private void OnEnable()
+    {
+        _navMeshAgent.enabled = true;
+        _animator.Run();
+    }
 
     private void OnDisable()
     {
@@ -19,24 +25,18 @@ public class HumanMover : MonoBehaviour
 
     private void Update()
     {
-        _navMeshAgent.SetDestination(_bossPosition);
-        //_transform.position = Vector3.MoveTowards(_transform.position, _bossPosition, 0.003f);
+        if (_isBoss == false)
+        {
+            _targetPosition = _transform.position + _transform.forward;
+        }
+
+        _transform.position = Vector3.MoveTowards(_transform.position, _targetPosition, 0.009f);
     }
 
     public void SetBossPosition(Vector3 bossPosition)
     {
         _navMeshAgent.enabled = true;
-        _bossPosition = bossPosition;
         _animator.Run();
-    }
-
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.TryGetComponent<Boss>(out Boss boss))
-        {
-            //_bossPosition = Vector3.zero;
-            //_stopPosition = _transform.position;
-        }
+        _targetPosition = bossPosition;
     }
 }

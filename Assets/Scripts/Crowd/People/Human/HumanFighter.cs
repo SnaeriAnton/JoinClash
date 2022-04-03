@@ -1,13 +1,16 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(HumanDeath))]
 public class HumanFighter : MonoBehaviour
 {
     [SerializeField] private HumanDeath _death;
 
-    private int _damage = 0;
+    private int _damage = 200;
     private Boss _boss;
+
+    public UnityAction Won;
 
     private void Awake()
     {
@@ -34,12 +37,19 @@ public class HumanFighter : MonoBehaviour
         }
     }
 
+    public void OnWin()
+    {
+        Won?.Invoke();
+        _boss.Died -= OnWin;
+    }
+
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.TryGetComponent<Boss>(out Boss boss))
+        if (other.gameObject.TryGetComponent<Boss>(out Boss boss) && _boss == null)
         {
             _boss = boss;
+            _boss.Died += OnWin;
             StartCoroutine(Push());
         }
     }
