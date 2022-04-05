@@ -8,6 +8,7 @@ public class Gate : MonoBehaviour
     [SerializeField] private GameObject _gates;
     [SerializeField] private BubbleCountPeople _bubbleCountPeople;
     [SerializeField] private GameObject _bubble;
+    [SerializeField] private AudioSource _audioSource;
 
     private void OnEnable()
     {
@@ -29,6 +30,7 @@ public class Gate : MonoBehaviour
     {
         _bubble.SetActive(true);
         _bubbleCountPeople.SetCountPeople(position, count, status);
+        _audioSource.Play();
         _gates.SetActive(false);
     }
 }

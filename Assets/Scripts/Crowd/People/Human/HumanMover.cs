@@ -11,11 +11,14 @@ public class HumanMover : MonoBehaviour
 
     private Vector3 _targetPosition;
     private bool _isBoss = false;
+    private Vector3 _fixPosition;
+    private float _speed = 3;
 
     private void OnEnable()
     {
         _navMeshAgent.enabled = true;
         _animator.Run();
+        _fixPosition = Vector3.zero;
     }
 
     private void OnDisable()
@@ -27,10 +30,14 @@ public class HumanMover : MonoBehaviour
     {
         if (_isBoss == false)
         {
-            _targetPosition = _transform.position + _transform.forward;
+            //_transform.position = Vector3.MoveTowards(_transform.position, _targetPosition, 0.009f);
+            _transform.position = Vector3.MoveTowards(_transform.position, _targetPosition, _speed * Time.deltaTime);
+        }
+        else
+        {
+            _transform.position = _fixPosition;
         }
 
-        _transform.position = Vector3.MoveTowards(_transform.position, _targetPosition, 0.009f);
     }
 
     public void SetBossPosition(Vector3 bossPosition)
@@ -38,5 +45,14 @@ public class HumanMover : MonoBehaviour
         _navMeshAgent.enabled = true;
         _animator.Run();
         _targetPosition = bossPosition;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.TryGetComponent<Boss>(out Boss boss))
+        {
+            _isBoss = true;
+            _fixPosition = _transform.position;
+        }
     }
 }

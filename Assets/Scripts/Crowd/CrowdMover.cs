@@ -6,10 +6,11 @@ using UnityEngine.Events;
 public class CrowdMover : MonoBehaviour
 {
     [SerializeField] private Transform _transform;
+    [SerializeField] private AudioSource _audioSource;
 
     private List<Vector3> _targets = new List<Vector3>();
     private Vector3 _target;
-    private float _speed = 0.03f;
+    private float _speed = 8f;
     private int _i = 0;
     private Vector3 _isArrive;
     private bool _inStop = false;
@@ -26,7 +27,7 @@ public class CrowdMover : MonoBehaviour
 
     private void Update()
     {
-        _transform.position = Vector3.MoveTowards(_transform.position, _target, _speed);
+        _transform.position = Vector3.MoveTowards(_transform.position, _target, _speed * Time.deltaTime);
 
         if (_targets.Count > 0)
         {
@@ -67,5 +68,6 @@ public class CrowdMover : MonoBehaviour
     public void AddTarget(Vector3 target)
     {
         _targets.Add(target);
+        _audioSource.Play();
     }
 }

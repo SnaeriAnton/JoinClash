@@ -8,6 +8,7 @@ public class HumanBolt : MonoBehaviour
     [SerializeField] private SpriteRenderer _spriteRenderer;
     [SerializeField] private HumanSpine _humanSpine;
     [SerializeField] private Transform _transform;
+    [SerializeField] private ParticleSystem _particleSystem;
 
     private void OnEnable()
     {
@@ -24,5 +25,6 @@ public class HumanBolt : MonoBehaviour
         _transform.position = new Vector3(position.x, _transform.position.y, position.z);
         int random = Random.Range(0, _sprites.Length);
         _spriteRenderer.sprite = _sprites[random];
+        _particleSystem.Play();
     }
 }

@@ -10,9 +10,9 @@ public class HumanDeath : MonoBehaviour
     [SerializeField] private Rigidbody _rigidbodie;
     [SerializeField] private Transform _transform;
     [SerializeField] private HumanAnimator _animator;
-    [SerializeField] private GameObject _human;
     [SerializeField] private HumanMover _mover;
     [SerializeField] private CapsuleCollider _capsileCollider;
+    [SerializeField] private HumanFighter _fighter;
 
     private bool _isDeath = false;
 
@@ -44,7 +44,6 @@ public class HumanDeath : MonoBehaviour
         for (int i = 0; i < _rigidbodies.Length; i++)
         {
             int forceó = Random.Range(1, 5) * 10;
-            //_rigidbodies[i].AddForce(new Vector3(_transform.forward.x * -1, 3f, _transform.forward.z * -1) * (10 + forceó), ForceMode.Acceleration);
             _rigidbodies[i].AddForce(new Vector3(_transform.forward.x * -1, 3f, _transform.forward.z * -1) * (50 + forceó), ForceMode.Acceleration);
         }
     }
@@ -62,6 +61,7 @@ public class HumanDeath : MonoBehaviour
         Died?.Invoke();
         _rigidbodie.isKinematic = true;
         _capsileCollider.enabled = false;
+        _fighter.enabled = false;
         _animator.enabled = false;
         _mover.enabled = false;
         Fall();

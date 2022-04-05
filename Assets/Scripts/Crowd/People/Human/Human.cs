@@ -21,6 +21,7 @@ public class Human : MonoBehaviour
     private Boss _boss;
 
     public UnityAction Finished;
+    public UnityAction Won;
 
     private void Update()
     {
@@ -110,8 +111,10 @@ public class Human : MonoBehaviour
 
     private void OnWin()
     {
+        Won?.Invoke();
         _animator.Win();
         _boss.Died -= OnWin;
         _mover.enabled = false;
+        _fighter.enabled = false;
     }
 }
