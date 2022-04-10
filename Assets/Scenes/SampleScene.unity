@@ -3046,7 +3046,7 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 118050049}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 3a2077c180a3ca547be104a6b6dac45f, type: 3}
@@ -23081,9 +23081,6 @@ MonoBehaviour:
   _navigator: {fileID: 1474265403}
   _bubble: {fileID: 23676390}
   _finger: {fileID: 376215038}
-  _divide: 0
-  _multiply: 0
-  _countPeople: 8
 --- !u!135 &935802699
 SphereCollider:
   m_ObjectHideFlags: 0
