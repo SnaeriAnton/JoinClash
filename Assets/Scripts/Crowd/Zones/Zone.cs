@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(SphereCollider))]
+[RequireComponent(typeof(AudioSource))]
 public class Zone : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer _spriteRenderer;
@@ -15,15 +17,11 @@ public class Zone : MonoBehaviour
     private Human[] _people;
     private int _coutnPeopleInZone;
 
-    public int CountPeople => _people.Length;
-
     private void Start()
     {
         _people = GetComponentsInChildren<Human>();
         _coutnPeopleInZone = _people.Length;
     }
-
-    public Vector3 Position => _transform.position;
 
     public void Select()
     {
@@ -37,29 +35,36 @@ public class Zone : MonoBehaviour
 
     private IEnumerator ChangeAlpha()
     {
+        float alphaChannel = 255;
+        float unit = 1f;
         var color = _spriteRenderer.color;
-        for (int i = 0; i < 255; i++)
+        for (int i = 0; i < alphaChannel; i++)
         {
-            color.a = 1f - (1f / 255f * i);
+            color.a = unit - (unit / alphaChannel * i);
             _spriteRenderer.color = color;
             yield return null;
         }
+    }
+
+    private void ManagerZone(Crowd crowd)
+    {
+        _sphereCollider.enabled = false;
+        for (int i = 0; i < _people.Length; i++)
+        {
+            crowd.AddPeople(_people[i]);
+        }
+        crowd.AddPeople(_coutnPeopleInZone, true);
+        _bubble.SetActive(true);
+        _countPeopleOfZone.SetCountPeople(_people.Length);
+        StartCoroutine(ChangeAlpha());
+        _audioSource.Play();
     }
 
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.TryGetComponent<Crowd>(out Crowd crowd))
         {
-            _sphereCollider.enabled = false;
-            for (int i = 0; i < _people.Length; i++)
-            {
-                crowd.AddPeople(_people[i]);
-            }
-            crowd.AddPeople(_coutnPeopleInZone, true);
-            _bubble.SetActive(true);
-            _countPeopleOfZone.SetCountPeople(_people.Length);
-            StartCoroutine(ChangeAlpha());
-            _audioSource.Play();
+            ManagerZone(crowd);
         }
     }
 }

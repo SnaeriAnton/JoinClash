@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+[RequireComponent(typeof(SphereCollider))]
 public class Crowd : MonoBehaviour
 {
     [SerializeField] private SphereCollider _sphereCollider;
@@ -14,21 +15,23 @@ public class Crowd : MonoBehaviour
     [SerializeField] private GameObject _bubble;
     [SerializeField] private Finger _finger;
 
-    private int _countPeople;
     private List<Human> _peopleInCrowd = new List<Human>();
-    private float _radius;
     private int _radiusCircle = 360;
-    private float _stepRadiusCircle = 0.28f;
+    private float _stepRadiusCircle = 0.3f;
     private int _countPeopleInFullCircles;
-    private int _maxPeopleInCircle = 8;
+    private int _maxPeopleInCircle = 0;
     private int _stepCountPeople = 8;
     private int _minCountPeople = 1;
-
-    public Transform TransformParent => _transform;
+    private Dictionary<int, int> _dictinaryCircles = new Dictionary<int, int>();
 
     public UnityAction Finished;
     public UnityAction<int> AddedPeople;
     public UnityAction<float> ChangedCrowd;
+    public UnityAction<float> GotReadyToRun;
+    public UnityAction<Vector3> LookedAtTarget;
+    public UnityAction Saw;
+    public UnityAction<Transform, Boss> ReachedFinish;
+    public UnityAction<float> Stand;
 
     private void OnEnable()
     {
@@ -48,17 +51,24 @@ public class Crowd : MonoBehaviour
 
     private void Start()
     {
-        _radius = _stepRadiusCircle;
-        _sphereCollider.radius = _radius;
+        _sphereCollider.radius = _stepRadiusCircle;
         _countPeopleInFullCircles = _minCountPeople;
+        AddFirstCircle();
+
         Human[] people = _transform.GetComponentsInChildren<Human>();
         for (int i = 0; i < people.Length; i++)
         {
             _peopleInCrowd.Add(people[i]);
+            _peopleInCrowd[i].SetCrowd(this);
             _peopleInCrowd[i].SetLookAt(_transformLookAt);
             _peopleInCrowd[i].SetActive(true);
         }
         AddedPeople?.Invoke(_peopleInCrowd.Count);
+    }
+
+    private void AddFirstCircle()
+    {
+        _dictinaryCircles.Add(_minCountPeople, _minCountPeople);
     }
 
     public void AddPeople(Human human)
@@ -97,89 +107,219 @@ public class Crowd : MonoBehaviour
     {
         if (countPeople != 0)
         {
-            int peopleInCrowd = _peopleInCrowd.Count - _countPeopleInFullCircles;
-            if (peopleInCrowd < _maxPeopleInCircle)
+            int sumPeopleInCrowd = countPeople + _peopleInCrowd.Count;
+            if (_countPeopleInFullCircles >= sumPeopleInCrowd)
             {
-                int lacksPeople = _maxPeopleInCircle - peopleInCrowd;
-                if (countPeople >= lacksPeople)
+                int addPeople = countPeople;
+                int maxPeopleInCircleKey;
+                int minSpaciousnessCrowd = (_dictinaryCircles.Count - 1) * (2 * _dictinaryCircles.Count);
+
+                if (minSpaciousnessCrowd > _peopleInCrowd.Count)
                 {
-                    _countPeople = countPeople - lacksPeople;
+                    maxPeopleInCircleKey = 8;
+                    for (int i = 1; i < _dictinaryCircles.Count; i++)
+                    {
+                        if (countPeople > 0)
+                        {
+                            _dictinaryCircles[maxPeopleInCircleKey] = ChangePeopleInCrowd(_dictinaryCircles[maxPeopleInCircleKey] <= 3, _dictinaryCircles[maxPeopleInCircleKey], (maxPeopleInCircleKey / 2), ref countPeople);
+                        }
+                        maxPeopleInCircleKey += _stepCountPeople;
+                    }
                 }
-                else
+                AddPeopleInCrowd(addPeople);
+
+                maxPeopleInCircleKey = _maxPeopleInCircle;
+
+                for (int i = 0; i < _dictinaryCircles.Count; i++)
                 {
-                    _countPeople = 0;
-                    lacksPeople = countPeople;
+                    if (countPeople > 0)
+                    {
+                        _dictinaryCircles[maxPeopleInCircleKey] = ChangePeopleInCrowd(_dictinaryCircles[maxPeopleInCircleKey] != maxPeopleInCircleKey, _dictinaryCircles[maxPeopleInCircleKey], maxPeopleInCircleKey, ref countPeople);
+                    }
+                    else
+                    {
+                        SortOutPlaceOfPeople();
+                        return;
+                    }
+                    maxPeopleInCircleKey -= _stepCountPeople;
                 }
-                PlaceNewPeople(lacksPeople, _radius, peopleInCrowd);
-                AddPeopleInCircle(_countPeople);
             }
             else
             {
                 ChangeValue(true);
+                _dictinaryCircles.Add(_maxPeopleInCircle, 0);
+                countPeople += SelectPeople(countPeople);
                 AddPeopleInCircle(countPeople);
             }
         }
     }
 
+    private void AddPeopleInCrowd(int countPeople)
+    {
+        for (int i = 0; i < countPeople; i++)
+        {
+            _peopleInCrowd.Add(_notActivePeople[i]);
+            _notActivePeople[i].SetCrowd(this);
+            _notActivePeople[i].SetActive(true);
+            _notActivePeople[i].SetLookAt(_transformLookAt);
+            _notActivePeople[i].StandPoseToRun();
+            _notActivePeople.RemoveAt(i); 
+        }
+        AddedPeople?.Invoke(_peopleInCrowd.Count);
+    }
+
+    private int SelectPeople(int countPeople)
+    {
+        int displacedPeople = 0;
+        int extra = 0;
+        int sumPeopleInCrowd = countPeople + _peopleInCrowd.Count;
+
+        if (_maxPeopleInCircle < countPeople && sumPeopleInCrowd < _countPeopleInFullCircles)
+        {
+            extra = countPeople - _maxPeopleInCircle;
+            countPeople -= extra;
+        }
+
+        if (_maxPeopleInCircle >= countPeople && _peopleInCrowd.Count != 1)
+        {
+            int difference = _maxPeopleInCircle - countPeople;
+            if (countPeople > _peopleInCrowd.Count)
+            {
+                int people = countPeople + _peopleInCrowd.Count;
+                int lacsksPeople = _countPeopleInFullCircles - people - extra;
+                displacedPeople += ReductionPeopleInCrowd(lacsksPeople);
+            }
+            else if (difference != 0)
+            {
+                displacedPeople += ReductionPeopleInCrowd(difference);
+            }
+        }
+        RemovePeople(displacedPeople);
+        return displacedPeople;
+    }
+
+    private int ReductionPeopleInCrowd(int lacksPeople)
+    {
+        int maxPeopleInCircleKey = 8;
+        int displacedPeople = 0;
+        for (int i = 1; i < _dictinaryCircles.Count; i++)
+        {
+            if (_dictinaryCircles[maxPeopleInCircleKey] != 0)
+            {
+                int minpeopleInCircle = maxPeopleInCircleKey / 2;
+                if (_dictinaryCircles[maxPeopleInCircleKey] > minpeopleInCircle)
+                {
+                    int difference = _dictinaryCircles[maxPeopleInCircleKey] - maxPeopleInCircleKey / 2;
+                    if (difference < lacksPeople)
+                    {
+                        displacedPeople += difference;
+                        lacksPeople -= displacedPeople;
+                        _dictinaryCircles[maxPeopleInCircleKey] -= difference;
+                    }
+                    else
+                    {
+                        _dictinaryCircles[maxPeopleInCircleKey] -= lacksPeople;
+                        displacedPeople += lacksPeople;
+                        lacksPeople = 0;
+                    }
+                }
+            }
+            maxPeopleInCircleKey += _stepCountPeople;
+        }
+        return displacedPeople;
+    }
+
     private void RemovePeopleFromCrowd(int countPeople)
     {
-        if (_peopleInCrowd.Count != 1 && countPeople != 0)
+        if (countPeople < 0)
         {
-            int remainderPeople = _peopleInCrowd.Count - countPeople;
-            if (_peopleInCrowd.Count <= countPeople || remainderPeople == 1)
+            countPeople *= -1;
+        }
+
+        int removePeople = countPeople;
+        int maxPeopleInCircleKey = 8;
+        int remove = -1;
+        int countPeopleInCrowd = (_peopleInCrowd.Count - 1) - countPeople;
+
+        if (countPeople != 0)
+        {
+            if (countPeopleInCrowd <= 0)
             {
-                int count = _peopleInCrowd.Count - 1;
-                RemovePeople(count);
-                SetDefaultValue();
-            }
-            else if (_countPeopleInFullCircles <= remainderPeople)
-            {
-                RemovePeople(countPeople);
-                PlaceOldPeople(_radius);
+                removePeople = _peopleInCrowd.Count - 1;
+
+                countPeople = 0;
+                _countPeopleInFullCircles = _minCountPeople;
+                _maxPeopleInCircle = 0;
+                _sphereCollider.radius = _stepRadiusCircle;
+                _dictinaryCircles.Clear();
+                AddFirstCircle();
             }
             else
             {
-                ChangeValue(false);
-                RemovePeopleFromCrowd(countPeople);
+                for (int i = 1; i < _dictinaryCircles.Count; i++)
+                {
+                    if (countPeople != 0)
+                    {
+                        _dictinaryCircles[maxPeopleInCircleKey] = ChangePeopleInCrowd((maxPeopleInCircleKey / 2) < _dictinaryCircles[maxPeopleInCircleKey], _dictinaryCircles[maxPeopleInCircleKey], (maxPeopleInCircleKey / 2), ref countPeople, remove);
+
+                        int minpeopleInCircle = maxPeopleInCircleKey / 2;
+                        int countCircle = _dictinaryCircles.Count - 1;
+                        if (_dictinaryCircles[maxPeopleInCircleKey] == minpeopleInCircle && countPeople >= minpeopleInCircle && countCircle == i)
+                        {
+                            countPeople -= _dictinaryCircles[maxPeopleInCircleKey];
+                            _dictinaryCircles[maxPeopleInCircleKey] = 0;
+                            ChangeValue(false);
+                            _dictinaryCircles.Remove(maxPeopleInCircleKey);
+                        }
+                        maxPeopleInCircleKey += _stepCountPeople;
+                    }
+                }
+
+                if (countPeople != 0)
+                {
+                    if (_dictinaryCircles[_maxPeopleInCircle] > countPeople)
+                    {
+                        _dictinaryCircles[_maxPeopleInCircle] -= countPeople;
+                        countPeople = 0;
+                    }
+                    else
+                    {
+                        countPeople -= _dictinaryCircles[_maxPeopleInCircle];
+                        _dictinaryCircles[_maxPeopleInCircle] = 0;
+                        _dictinaryCircles.Remove(_maxPeopleInCircle);
+                        ChangeValue(false);
+                    }
+                }
+                removePeople -= countPeople;
             }
         }
-        _countPeople = 0;
+
+        RemovePeople(removePeople);
+        if (countPeople != 0)
+        {
+            RemovePeopleFromCrowd(countPeople);
+        }
+        DistributePeople();
+        SortOutPlaceOfPeople();
     }
 
-    private void ChangeValue(bool _changerValue)
+    private void RemovePeople(int countPeople)
     {
-        if (_changerValue == true)
+        int remainderPeople = _peopleInCrowd.Count - countPeople;
+        if (_peopleInCrowd.Count != 1)
         {
-            _countPeopleInFullCircles += _maxPeopleInCircle;
-            _maxPeopleInCircle += _stepCountPeople;
-            _radius += _stepRadiusCircle;
-            _sphereCollider.radius = _radius;
-            ChangedCrowd?.Invoke(_stepRadiusCircle);
-        }
-        else
-        {
-            _maxPeopleInCircle -= _stepCountPeople;
-            _countPeopleInFullCircles -= _maxPeopleInCircle;
-            if (_countPeopleInFullCircles < 0)
+            if (remainderPeople > 0)
             {
-                _countPeopleInFullCircles = _minCountPeople;
+                RemoveHuman(countPeople);
             }
-            _radius -= _stepRadiusCircle;
-            _sphereCollider.radius = _radius;
-            ChangedCrowd?.Invoke(-_stepRadiusCircle);
+            else
+            {
+                RemoveHuman(_peopleInCrowd.Count - 1);
+            }
         }
     }
 
-    private void SetDefaultValue()
-    {
-        _countPeopleInFullCircles = _minCountPeople;
-        _maxPeopleInCircle = _stepCountPeople;
-        ChangedCrowd?.Invoke(-_radius);
-        _radius = _stepRadiusCircle;
-        _sphereCollider.radius = _radius;
-    }
-
-    private void RemovePeople(int count)
+    private void RemoveHuman(int count)
     {
         for (int i = 0; i < count; i++)
         {
@@ -189,78 +329,132 @@ public class Crowd : MonoBehaviour
         }
     }
 
-    private void PlaceNewPeople(int countPeople, float radius, int peopleInCircle)
+    private int ChangePeopleInCrowd(bool value, int countPeopleInCircle, int peopleInCircleKey, ref int countPeople, int remove = 1)
     {
-        int angleStep = _radiusCircle / (peopleInCircle + countPeople);
-        for (int i = 0; i < countPeople; i++)
+        if (value == true)
         {
-            _peopleInCrowd.Add(_notActivePeople[i]);
-            _notActivePeople[i].SetActive(true);
-            _notActivePeople[i].SetLookAt(_transformLookAt);
-            _notActivePeople[i].SetRadius(radius);
-            _notActivePeople[i].StandPoseToRun();
-            _notActivePeople.RemoveAt(i);
+            int lacksPeople = peopleInCircleKey - countPeopleInCircle;
+
+            if (lacksPeople < 0)
+            {
+                lacksPeople *= -1;
+            }
+
+            if (countPeople >= lacksPeople)
+            {
+                countPeopleInCircle += (lacksPeople * remove);
+                countPeople -= lacksPeople;
+            }
+            else
+            {
+                countPeopleInCircle += (countPeople * remove);
+                countPeople = 0;
+            }
         }
-
-        AddedPeople?.Invoke(_peopleInCrowd.Count);
-
-        int startValue = _peopleInCrowd.Count - (peopleInCircle + countPeople);
-
-        SortOutPeople(startValue, radius, angleStep);
+        return countPeopleInCircle;
     }
 
-    private void PlaceOldPeople(float radius)
+    private void DistributePeople()
     {
-        if (_peopleInCrowd.Count - _countPeopleInFullCircles <= 0)
-        {
-            return;
-        }
-        int angleStep = _radiusCircle / (_peopleInCrowd.Count - _countPeopleInFullCircles);
-        int startValue = _peopleInCrowd.Count - (_peopleInCrowd.Count - _countPeopleInFullCircles);
+        int maxPeopleInCircleKey = _maxPeopleInCircle;
+        int freePeople = 0;
 
-        SortOutPeople(startValue, radius, angleStep);
+        for (int i = 0; i < (_dictinaryCircles.Count - 1); i++)
+        {
+            _dictinaryCircles[maxPeopleInCircleKey] = ChangePeopleInCrowd(freePeople != 0, _dictinaryCircles[maxPeopleInCircleKey], maxPeopleInCircleKey, ref freePeople);
+
+            int countPeopleInCrowd = _countPeopleInFullCircles - _maxPeopleInCircle;
+
+            if (countPeopleInCrowd >= _peopleInCrowd.Count)
+            {
+                freePeople = _dictinaryCircles[maxPeopleInCircleKey];
+                _dictinaryCircles[maxPeopleInCircleKey] = 0;
+                ChangeValue(false);
+            }
+            maxPeopleInCircleKey -= _stepCountPeople;
+        }
+
+        maxPeopleInCircleKey = 8;
+
+        for (int i = 1; i < _dictinaryCircles.Count; i++)
+        {
+            if (_dictinaryCircles[maxPeopleInCircleKey] == 0)
+            {
+                _dictinaryCircles.Remove(maxPeopleInCircleKey);
+            }
+            maxPeopleInCircleKey += _stepCountPeople;
+        }
     }
 
-    private void SortOutPeople(int startValue, float radius, float angleStep)
+    private void ChangeValue(bool increase)
     {
-        for (int i = startValue; i < _peopleInCrowd.Count; i++)
+        if (increase == true)
         {
-            _peopleInCrowd[i].SetPosition(new Vector3(radius * Mathf.Cos(angleStep * (i + 1) * Mathf.Deg2Rad), 0, radius * Mathf.Sin(angleStep * (i + 1) * Mathf.Deg2Rad)));
+            _maxPeopleInCircle += _stepCountPeople;
+            _countPeopleInFullCircles += _maxPeopleInCircle;
+            _sphereCollider.radius += _stepRadiusCircle;
+        }
+        else
+        {
+            _countPeopleInFullCircles -= _maxPeopleInCircle;
+            _maxPeopleInCircle -= _stepCountPeople;
+            _sphereCollider.radius -= _stepRadiusCircle;
+        }
+    }
+
+    private void SortOutPlaceOfPeople()
+    {
+        float radius = 0;
+        int startValue = 0;
+        int countPeople = _peopleInCrowd.Count - 1;
+
+        if (countPeople > 0)
+        {
+            foreach (var circle in _dictinaryCircles)
+            {
+                if (circle.Key != 1 && circle.Value != 0)
+                {
+                    float angleStep = _radiusCircle / circle.Value;
+                    for (int i = startValue; i < circle.Value + startValue; i++)
+                    {
+                        _peopleInCrowd[i].SetPosition(new Vector3(radius * Mathf.Cos(angleStep * (i + 1) * Mathf.Deg2Rad), 0, radius * Mathf.Sin(angleStep * (i + 1) * Mathf.Deg2Rad)), radius);
+                    }
+                }
+                radius += _stepRadiusCircle;
+                startValue += circle.Value;
+            }
         }
     }
 
     private void OnSetDistance(float distance)
     {
-        foreach (var human in _peopleInCrowd)
-        {
-            human.ReadyToRun(distance);
-        }
+        GotReadyToRun?.Invoke(distance);
     }
 
     private void OnStayStill()
     {
         int distance = 0;
-        foreach (var human in _peopleInCrowd)
-        {
-            human.ReadyToRun(distance);
-            human.Stay();
-        }
+        Stand?.Invoke(distance);
     }
 
     private void OnSetLookAtTarget(Vector3 position)
     {
-        foreach (var human in _peopleInCrowd)
-        {
-            human.LookAtRotation(position);
-        }
+        LookedAtTarget?.Invoke(position);
     }
 
     private void OnSee()
     {
-        foreach (var human in _peopleInCrowd)
-        {
-            human.See();
-        }
+        Saw?.Invoke();
+    }
+
+    private void ReacheFinish(Finish finish)
+    {
+        ReachedFinish?.Invoke(finish.PositionBoss, finish.Boss);
+        _sphereCollider.enabled = false;
+        Finished?.Invoke();
+        this.enabled = false;
+        _crowdMover.enabled = false;
+        _bubble.SetActive(false);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -272,15 +466,7 @@ public class Crowd : MonoBehaviour
 
         if (other.TryGetComponent<Finish>(out Finish finish))
         {
-            foreach (var human in _peopleInCrowd)
-            {
-                human.ReacheFinish(finish.PositionBoss, finish.Boss);
-            }
-            _sphereCollider.enabled = false;
-            Finished?.Invoke();
-            this.enabled = false;
-            _crowdMover.enabled = false;
-            _bubble.SetActive(false);
+            ReacheFinish(finish);
         }
     }
 }

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -12,17 +10,13 @@ public class Bubble : MonoBehaviour
 
     private void OnEnable()
     {
+        _lable.text = _defaultCount;
         _crowd.AddedPeople += OnChangeText;
     }
 
     private void OnDisable()
     {
         _crowd.AddedPeople -= OnChangeText;
-    }
-
-    private void Start()
-    {
-        _lable.text = _defaultCount;
     }
 
     private void OnChangeText(int count)

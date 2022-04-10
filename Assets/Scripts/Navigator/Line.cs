@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(LineRenderer))]
 public class Line : MonoBehaviour
 {
     [SerializeField] private LineRenderer _lineRenderer;
@@ -51,7 +52,6 @@ public class Line : MonoBehaviour
     public Vector3 GetPositionLineRenderer(int index)
     {
         return _lineRenderer.GetPosition(index);
-
     }
 
     public void ChangeColorLineRandarer(bool value)

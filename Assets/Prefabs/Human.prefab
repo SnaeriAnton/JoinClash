@@ -1295,7 +1295,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7071008779254566884}
-  m_Enabled: 0
+  m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: fa7f36c71b9e8fa4798df3a931c2fd92, type: 3}
   m_Controller: {fileID: 9100000, guid: 42f4cb3230f799b45a137e6cea2cf84e, type: 2}
   m_CullingMode: 1
@@ -1418,8 +1418,8 @@ MonoBehaviour:
   _animator: {fileID: 7071008779263966282}
   _mover: {fileID: -43247399038650007}
   _human: {fileID: 7071008779254566884}
-  _humanInCrowdColor: {r: 0.2901961, g: 0.7019608, b: 0.9607843, a: 1}
-  _humanNotInCrowdColor: {r: 1, g: 1, b: 1, a: 1}
+  _humanInCrowdMaterial: {fileID: 2100000, guid: 31beb8f3ceab5dd41bbae1fe30de93e6, type: 2}
+  _humanNotInCrowdaterial: {fileID: 2100000, guid: 9f76340614e34b340bfe7ba90d22bef8, type: 2}
   _skinnedMeshRenderer: {fileID: 7071008779268227722}
 --- !u!114 &5304492080839152917
 MonoBehaviour:
@@ -1693,7 +1693,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31beb8f3ceab5dd41bbae1fe30de93e6, type: 2}
+  - {fileID: 2100000, guid: 9f76340614e34b340bfe7ba90d22bef8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -13,24 +13,17 @@ public class Navigator : MonoBehaviour
     private float _radius = 0;
     private float _defaultRadius = 1.8f;
 
-    //public UnityAction Enabled;
     public UnityAction Disabled;
 
     private void OnEnable()
     {
-        //Enabled?.Invoke();
-       
+        _radius = _defaultRadius;
         _crowd.ChangedCrowd += OnSetRadius;
     }
 
     private void OnDisable()
     {
         _crowd.ChangedCrowd -= OnSetRadius;
-    }
-
-    private void Start()
-    {
-        _radius = _defaultRadius;
     }
 
     public void Track(Vector3 newPosition, bool spriteEnable)

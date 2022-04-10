@@ -9,6 +9,8 @@ public class BubbleCountPeople : MonoBehaviour
     [SerializeField] private GameObject _zone;
 
     private char _sign = '+';
+    private float _speed = 0.003f;
+    private Vector3 _direction = new Vector3(0, 1, 0);
 
     private void OnEnable()
     {
@@ -17,7 +19,7 @@ public class BubbleCountPeople : MonoBehaviour
 
     private void Update()
     {
-        _transform.position = Vector3.MoveTowards(_transform.position, _transform.position + new Vector3(0, 1, 0), 0.003f);
+        _transform.position = Vector3.MoveTowards(_transform.position, _transform.position + _direction, _speed);
     }
 
     public void SetCountPeople(int count)
@@ -27,10 +29,12 @@ public class BubbleCountPeople : MonoBehaviour
 
     private IEnumerator ChangeAlpha()
     {
-        var color = _text.color;
-        for (int i = 0; i < 255; i++)
+        float alphaChannel = 255;
+        float unit = 1f;
+        Color color = _text.color;
+        for (int i = 0; i < alphaChannel; i++)
         {
-            color.a = 1f - (1f / 255f * i);
+            color.a = unit - (unit / alphaChannel * i);
             _text.color = color;
             yield return null;
         }

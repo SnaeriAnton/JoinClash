@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -29,6 +28,13 @@ public class CrowdMover : MonoBehaviour
     {
         _transform.position = Vector3.MoveTowards(_transform.position, _target, _speed * Time.deltaTime);
 
+        EnumirationTarget();
+        CheakArricePOsition();
+        ClearRoat();
+    }
+
+    private void EnumirationTarget()
+    {
         if (_targets.Count > 0)
         {
             _isArrive = _targets[_targets.Count - 1];
@@ -45,24 +51,26 @@ public class CrowdMover : MonoBehaviour
                 Seted?.Invoke(_target);
             }
         }
+    }
 
-
+    private void CheakArricePOsition()
+    {
         if (_transform.position == _isArrive && _inStop == true)
         {
             Arrived?.Invoke();
             _inStop = false;
             _firstTarget = true;
         }
+    }
 
-
+    private void ClearRoat()
+    {
         if (_i + 1 == _targets.Count)
         {
             _i = 0;
             _targets.Clear();
             _inStop = true;
         }
-
-
     }
 
     public void AddTarget(Vector3 target)

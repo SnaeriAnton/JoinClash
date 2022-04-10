@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.Events;
 
+[RequireComponent(typeof(BossAnimator))]
+[RequireComponent(typeof(AudioSource))]
 public class Boss : MonoBehaviour
 {
     [SerializeField] private Transform _trandform;
@@ -24,6 +26,11 @@ public class Boss : MonoBehaviour
     }
 
     private void Update()
+    {
+        StayOnPlace();
+    }
+
+    private void StayOnPlace()
     {
         _trandform.position = _defaultPosition;
     }

@@ -11,7 +11,8 @@ public class InputManager : MonoBehaviour
     private float _maxDistance = 10000000;
     private bool _zonOfPeople;
     private float _distanceFromCamera = 6.2f;
-    Vector3 _screenWorldPosition;
+    private Vector3 _screenWorldPosition;
+    private float _minDistanceBeetvenNavigator = 0.26f;
 
     private void OnEnable()
     {
@@ -58,7 +59,6 @@ public class InputManager : MonoBehaviour
     private void LetGo()
     {
         _zonOfPeople = false;
-        //_navigatorObject.SetActive(_zonOfPeople);
         _navigator.DisableFinger(_zonOfPeople);
         _navigator.Track(Vector3.zero, _zonOfPeople);
         _way.ClearLines();
@@ -68,7 +68,6 @@ public class InputManager : MonoBehaviour
     {
         if (_zonOfPeople == true)
         {
-            //_navigatorObject.SetActive(_zonOfPeople);
             _navigator.DisableFinger(_zonOfPeople);
             _navigator.Track(screenWorldPosition, _zonOfPeople);
             if (CheakDistanceBetweenZonAndNavigator() == true)
@@ -81,7 +80,7 @@ public class InputManager : MonoBehaviour
     private bool CheakDistanceBetweenZonAndNavigator()
     {
         float disctance = Vector3.Distance(_navigator.transform.position, _way.transform.position);
-        if (disctance > 0.26f)
+        if (disctance > _minDistanceBeetvenNavigator)
         {
             return true;
         }

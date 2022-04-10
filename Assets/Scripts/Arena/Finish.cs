@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
 public class Finish : MonoBehaviour 
 {
     [SerializeField] private Transform _transformBoss;
