@@ -19,7 +19,7 @@ public class Way : MonoBehaviour
     private int _invertVector = -1;
     private float _distance = 0;
     private float _offsetCrowd = 0.1f;
-    private float _defaulsDistance = 1.95f;
+    private float _defaulsDistance = 2.75f;
     private bool _isFirst = true;
     private int _endPositionLine = 1;
 

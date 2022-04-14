@@ -10,7 +10,7 @@ public class InputManager : MonoBehaviour
 
     private float _maxDistance = 10000000;
     private bool _zonOfPeople;
-    private float _distanceFromCamera = 6.2f;
+    private float _distanceFromCamera = 5.3f;
     private Vector3 _screenWorldPosition;
     private float _minDistanceBeetvenNavigator = 0.26f;
 

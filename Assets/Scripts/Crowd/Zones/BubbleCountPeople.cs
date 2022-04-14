@@ -7,44 +7,47 @@ public class BubbleCountPeople : MonoBehaviour
     [SerializeField] private TMP_Text _text;
     [SerializeField] private Transform _transform;
     [SerializeField] private GameObject _zone;
+    [SerializeField] private SpriteRenderer _spriteRenderer;
 
     private char _sign = '+';
-    private float _speed = 0.003f;
+    private float _speed = 3f;
+    private float _speedAlpha = 4f;
     private Vector3 _direction = new Vector3(0, 1, 0);
+    private Color _color;
 
     private void OnEnable()
     {
-        StartCoroutine(ChangeAlpha());
+        _color.a = 0;
     }
 
     private void Update()
     {
-        _transform.position = Vector3.MoveTowards(_transform.position, _transform.position + _direction, _speed);
+        _transform.position = Vector3.MoveTowards(_transform.position, _transform.position + _direction, _speed * Time.deltaTime);
+        _text.color = Color.Lerp(_text.color, _color, _speedAlpha * Time.deltaTime);
+
+        if (_spriteRenderer != false)
+        {
+            _spriteRenderer.color = Color.Lerp(_spriteRenderer.color, _color, _speedAlpha * Time.deltaTime);
+        }
+
+        if (_text.color.a <= 0.001)
+        {
+            Disable();
+        }
+    }
+
+    private void Disable()
+    {
+        if (_zone != null)
+        {
+            _zone.SetActive(false);
+        }
+        this.enabled = false;
     }
 
     public void SetCountPeople(int count)
     {
         _text.text = _sign + count.ToString();
-    }
-
-    private IEnumerator ChangeAlpha()
-    {
-        float alphaChannel = 255;
-        float unit = 1f;
-        Color color = _text.color;
-        for (int i = 0; i < alphaChannel; i++)
-        {
-            color.a = unit - (unit / alphaChannel * i);
-            _text.color = color;
-            yield return null;
-        }
-
-        if (_text.color.r <= 1)
-        {
-            StopCoroutine(ChangeAlpha());
-            _zone.SetActive(false);
-            yield return null;
-        }
     }
 
     public void SetCountPeople(Vector3 position, int count, bool status)

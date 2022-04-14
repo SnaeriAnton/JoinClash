@@ -33,19 +33,6 @@ public class Zone : MonoBehaviour
         _spriteRenderer.sprite = _deselectSprite;
     }
 
-    private IEnumerator ChangeAlpha()
-    {
-        float alphaChannel = 255;
-        float unit = 1f;
-        var color = _spriteRenderer.color;
-        for (int i = 0; i < alphaChannel; i++)
-        {
-            color.a = unit - (unit / alphaChannel * i);
-            _spriteRenderer.color = color;
-            yield return null;
-        }
-    }
-
     private void ManagerZone(Crowd crowd)
     {
         _sphereCollider.enabled = false;
@@ -56,7 +43,6 @@ public class Zone : MonoBehaviour
         crowd.AddPeople(_coutnPeopleInZone, true);
         _bubble.SetActive(true);
         _countPeopleOfZone.SetCountPeople(_people.Length);
-        StartCoroutine(ChangeAlpha());
         _audioSource.Play();
     }
 

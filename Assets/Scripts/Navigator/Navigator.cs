@@ -11,7 +11,7 @@ public class Navigator : MonoBehaviour
     [SerializeField] private GameObject _finger;
 
     private float _radius = 0;
-    private float _defaultRadius = 1.8f;
+    private float _defaultRadius = 2.6f;
 
     public UnityAction Disabled;
 

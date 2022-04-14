@@ -14,6 +14,7 @@ public class Crowd : MonoBehaviour
     [SerializeField] private Navigator _navigator;
     [SerializeField] private GameObject _bubble;
     [SerializeField] private Finger _finger;
+    [SerializeField] private GameObject _trail;
 
     private List<Human> _peopleInCrowd = new List<Human>();
     private int _radiusCircle = 360;
@@ -455,6 +456,7 @@ public class Crowd : MonoBehaviour
         this.enabled = false;
         _crowdMover.enabled = false;
         _bubble.SetActive(false);
+        _trail.SetActive(false);
     }
 
     private void OnTriggerEnter(Collider other)
