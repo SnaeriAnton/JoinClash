@@ -24,7 +24,6 @@ public class Human : MonoBehaviour
     public UnityAction Finished;
     public UnityAction Won;
 
-
     private void OnDisable()
     {
         if (_crowd != null)
@@ -127,6 +126,11 @@ public class Human : MonoBehaviour
         _crowd.Saw += OnSee;
         _crowd.ReachedFinish += OnReacheFinish;
         _crowd.Stand += Stay;
+    }
+
+    public void SetPriority(int priorityNumber)
+    {
+        _mover.SetPriority(priorityNumber);
     }
 
     private void OnWin()

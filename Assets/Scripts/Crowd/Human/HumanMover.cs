@@ -28,19 +28,19 @@ public class HumanMover : MonoBehaviour
 
     private void Update()
     {
-        if (_isBoss == false)
-        {
-            _transform.position = Vector3.MoveTowards(_transform.position, _targetPosition, _speed * Time.deltaTime);
-        }
-        else
+        if (_isBoss == true)
         {
             FixedPosition();
         }
+        else
+        {
+            _navMeshAgent.SetDestination(_targetPosition);
+        }
     }
 
-    private void FixedPosition()
+    public void SetPriority(int priorityHumber)
     {
-        _transform.position = _fixPosition;
+        _navMeshAgent.avoidancePriority = priorityHumber;
     }
 
     public void SetBossPosition(Vector3 bossPosition)
@@ -48,6 +48,11 @@ public class HumanMover : MonoBehaviour
         _navMeshAgent.enabled = true;
         _animator.Run();
         _targetPosition = bossPosition;
+    }
+
+    private void FixedPosition()
+    {
+        _transform.position = _fixPosition;
     }
 
     private void OnTriggerEnter(Collider other)
