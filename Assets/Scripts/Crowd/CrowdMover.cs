@@ -9,7 +9,7 @@ public class CrowdMover : MonoBehaviour
 
     private List<Vector3> _targets = new List<Vector3>();
     private Vector3 _target;
-    private float _speed = 12f;
+    private float _speed = 16f;
     private int _i = 0;
     private Vector3 _isArrive;
     private bool _inStop = false;

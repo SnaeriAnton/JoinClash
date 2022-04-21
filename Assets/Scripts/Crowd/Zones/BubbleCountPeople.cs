@@ -10,8 +10,8 @@ public class BubbleCountPeople : MonoBehaviour
     [SerializeField] private SpriteRenderer _spriteRenderer;
 
     private char _sign = '+';
-    private float _speed = 3f;
-    private float _speedAlpha = 4f;
+    private float _speed = 1f;
+    private float _speedAlpha = 2.5f;
     private Vector3 _direction = new Vector3(0, 1, 0);
     private Color _color;
 
