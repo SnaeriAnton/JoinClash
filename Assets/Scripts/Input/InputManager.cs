@@ -41,7 +41,7 @@ public class InputManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        SetDirection(_screenWorldPosition);
+        PaveWay(_screenWorldPosition);
     }
 
     private Vector3 GetScreenPosition()
@@ -59,16 +59,16 @@ public class InputManager : MonoBehaviour
     private void LetGo()
     {
         _zonOfPeople = false;
-        _navigator.DisableFinger(_zonOfPeople);
+        _navigator.ActiveFinger(_zonOfPeople);
         _navigator.Track(Vector3.zero, _zonOfPeople);
         _way.ClearLines();
     }
 
-    private void SetDirection(Vector3 screenWorldPosition)
+    private void PaveWay(Vector3 screenWorldPosition)
     {
         if (_zonOfPeople == true)
         {
-            _navigator.DisableFinger(_zonOfPeople);
+            _navigator.ActiveFinger(_zonOfPeople);
             _navigator.Track(screenWorldPosition, _zonOfPeople);
             if (CheakDistanceBetweenZonAndNavigator() == true)
             {

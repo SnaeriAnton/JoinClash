@@ -91,61 +91,81 @@ public class Way : MonoBehaviour
 
         if (hits.Length == 0)
         {
-            hitPosition = startPosition + direction * _distance;
-            if (_zones.Count == 0)
-            {
-                ChabgeColorLineWay(false);
-            }
+            hitPosition = GetHitPosition(startPosition, direction);
+            ChekCountZones();
         }
         else
         {
             hitPosition = hits[_firstContact].point;
-            if (_zones.Count == 0)
-            {
-                ChabgeColorLineWay(false);
-            }
+            ChekCountZones();
         }
 
         DrawWayLine(startPosition, hitPosition, indexLine, zoneWithPeople);
 
-        if (hits.Length >= 1)
+        if (hits.Length >= 1 && CheckFinger(hits) == false)
         {
-            bool isFinger = false;
-            foreach (var hit in hits)
-            {
-                if (hit.transform.TryGetComponent<Finger>(out Finger finger))
-                {
-                    _distance = Vector3.Distance(_transform.position, finger.transform.position);
-                    MovedAway?.Invoke(_distance);
-                    isFinger = true;
-                }
-            }
-
-            if (hits[_firstContact].transform.TryGetComponent<Wall>(out Wall wall) && isFinger == false)
-            {
-                _distance = _defaulsDistance;
-                MovedAway?.Invoke(_distance);
-                addLine += CalculaterWayLine(hits[_firstContact].point, Vector3.Reflect(direction, hits[_firstContact].normal), indexLine + addLine);
-            }
-
-            if (hits[_firstContact].transform.TryGetComponent<Zone>(out Zone zone) && isFinger == false)
-            {
-                _distance = _defaulsDistance;
-                MovedAway?.Invoke(_distance);
-                if (CheakPeople(zone))
-                {
-                    addLine += CalculaterWayLine(zone.transform.position, hits[_firstContact].normal * _invertVector, indexLine + addLine, zone);
-                }
-                else
-                {
-                    hitPosition = startPosition + direction * _distance;
-                    DrawWayLine(startPosition, hitPosition, indexLine);
-                }
-                ChabgeColorLineWay(true);
-                _zones.Clear();
-            }
+            CheckHits(hits[_firstContact], startPosition, direction, hitPosition, indexLine, ref addLine);
         }
         return addLine;
+    }
+
+    private void ChekCountZones()
+    {
+        if (_zones.Count == 0)
+        {
+            ChangeColorLineWay(false);
+        }
+    }
+
+    private Vector3 GetHitPosition(Vector3 startPosition, Vector3 direction)
+    {
+        Vector3 hitPosition = startPosition + direction * _distance;
+        return hitPosition;
+    }
+
+    private void SetDistance(float distance)
+    {
+        _distance = distance;
+        MovedAway?.Invoke(_distance);
+    }
+
+    private void CheckHits(RaycastHit hit, Vector3 startPosition, Vector3 direction, Vector3 hitPosition, int indexLine, ref int addLine)
+    {
+
+        if (hit.transform.TryGetComponent<Wall>(out Wall wall))
+        {
+            SetDistance(_defaulsDistance);
+            addLine += CalculaterWayLine(hit.point, Vector3.Reflect(direction, hit.normal), indexLine + addLine);
+        }
+
+        if (hit.transform.TryGetComponent<Zone>(out Zone zone))
+        {
+            SetDistance(_defaulsDistance);
+            if (CheakPeople(zone) == true)
+            {
+                addLine += CalculaterWayLine(zone.transform.position, hit.normal * _invertVector, indexLine + addLine, zone);
+            }
+            else
+            {
+                hitPosition = GetHitPosition(startPosition, direction);
+                DrawWayLine(startPosition, hitPosition, indexLine);
+            }
+            ChangeColorLineWay(true);
+            _zones.Clear();
+        }
+    }
+
+    private bool CheckFinger(RaycastHit[] hits)
+    {
+        foreach (var hit in hits)
+        {
+            if (hit.transform.TryGetComponent<Finger>(out Finger finger))
+            {
+                SetDistance(Vector3.Distance(_transform.position, finger.transform.position));
+                return true;
+            }
+        }
+        return false;
     }
 
     private void DrawWayLine(Vector3 startposition, Vector3 finishPosition, int indexLine, Zone zoneWithPeople = null)
@@ -182,7 +202,7 @@ public class Way : MonoBehaviour
         return true;
     }
 
-    private void ChabgeColorLineWay(bool value)
+    private void ChangeColorLineWay(bool value)
     {
         for (int i = 0; i < _lines.Count; i++)
         {

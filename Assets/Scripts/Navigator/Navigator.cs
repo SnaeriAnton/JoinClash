@@ -40,7 +40,7 @@ public class Navigator : MonoBehaviour
         _transform.position = new Vector3(position.x, _transform.position.y, position.z);
     }
 
-    public void DisableFinger(bool value)
+    public void ActiveFinger(bool value)
     {
         _finger.SetActive(value);
     }

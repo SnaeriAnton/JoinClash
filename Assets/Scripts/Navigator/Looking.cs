@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Observer : MonoBehaviour
+public class Looking : MonoBehaviour
 {
     [SerializeField] private Transform _transform;
     [SerializeField] private Transform _transfromLookAt;
