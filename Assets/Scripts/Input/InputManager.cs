@@ -41,7 +41,7 @@ public class InputManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        PaveWay(_screenWorldPosition);
+        BeginePaveWay(_screenWorldPosition);
     }
 
     private Vector3 GetScreenPosition()
@@ -64,7 +64,7 @@ public class InputManager : MonoBehaviour
         _way.ClearLines();
     }
 
-    private void PaveWay(Vector3 screenWorldPosition)
+    private void BeginePaveWay(Vector3 screenWorldPosition)
     {
         if (_zonOfPeople == true)
         {
